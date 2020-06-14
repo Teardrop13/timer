@@ -1,0 +1,78 @@
+#!/usr/bin/python3
+
+import sys
+import time
+import json
+import datetime
+
+filepath = "/var/lib/soc_timer/times.json"
+
+
+def timer_start():
+    file = open(filepath, 'r')
+    dictionary = json.load(file)
+    file.close()
+
+    dictionary["start"] = time.time()
+
+    file = open(filepath, 'w')
+    json.dump(dictionary, file)
+    file.close()
+
+
+def timer_stop():
+    file = open(filepath, 'r')
+    dictionary = json.load(file)
+    file.close()
+
+    dictionary["saved"] = time.time() - dictionary["start"] + \
+        dictionary["saved"]
+
+    file = open(filepath, 'w')
+    json.dump(dictionary, file)
+    file.close()
+
+
+def timer_reset():
+    now = datetime.datetime.now()
+    since = (now.strftime("%H:%M:%S %d.%m.%Y "))
+
+    dictionary = {
+        "saved": 0,
+        "start": time.time(),
+        "since": since
+    }
+
+    file = open(filepath, 'w')
+    json.dump(dictionary, file)
+    file.close()
+
+
+def timer_check():
+    file = open(filepath, 'r')
+    dictionary = json.load(file)
+    file.close()
+
+    time_minutes = (time.time() - dictionary["start"] + dictionary["saved"])/60
+    time_hours = str(int(time_minutes / 60)) + ":" + (str(int(time_minutes) % 60))[:2]
+
+    print("minutes: " + str(int(time_minutes)))
+    print("hours: " + time_hours)
+    print("since: " + dictionary["since"])
+
+
+if __name__ == "__main__":
+    if len(sys.argv) == 2:
+        mode = sys.argv[1]
+        if mode == '-start':
+            timer_start()
+        elif mode == '-stop':
+            timer_stop()
+        elif mode == '-help':
+            print("usage: timer [-start] [-stop] [-reset]")
+        elif mode == '-reset':
+            timer_reset()
+        else:
+            print("wrong argument")
+    else:
+        timer_check()

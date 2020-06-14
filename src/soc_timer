@@ -1,0 +1,10 @@
+#!/bin/sh
+# path: /lib/systemd/system-sleep
+case $1/$2 in
+  pre/*)
+    timer -stop
+    ;;
+  post/*)
+    timer -start
+    ;;
+esac
